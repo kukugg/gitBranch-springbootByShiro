@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Login</title>
+<link href="css/style-login.css" rel='stylesheet' type='text/css' />
+<script src="js/jquery-1.7.1.min.js"></script>
+<!-- <script src="assets/js/bootstrap.min.js"></script> -->
+</head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script>
+	function resetform() {
+		$("#loginForm")[0].reset();
+		/* document.getElementById("loginForm").reset(); */
+	}
+	//为当前页面绑定回车键事件 form表单已绑定回车事件
+	/* $(function() {
+		$(document.documentElement).bind("keydown", function(e) {
+			e = e || window.event; 
+			key = e.keyCode || e.which || e.charCode;
+			if (key == 13) {
+				//submitform();
+			}
+		});
+	}); */
+</script>
+<body>
+	<h1>管 理 平 台</h1>
+	<h5>PLATFORM SYSTEM</h5>
+	<div class="login-form">
+		<!-- <div class="note-right">用 户 登 录</div> -->
+		<div class="close" onclick="resetform()" title="重置"></div>
+		<div class="head-info">
+			<!-- 预留主题切换 -->
+			<label class="lbl-1"> </label> <label class="lbl-2"> </label> <label
+				class="lbl-3"> </label>
+		</div>
+		<!-- 不允许浮动元素 -->
+		<div class="clear"></div>
+		<div class="avatar">
+			<img src="images/login/avatar.png" />
+		</div>
+		<form id="loginForm" action="index.html">
+			<input type="text" value="admin">
+			<!-- onfocus="this.value = '';" onblur="if (this.value == '') {this.value = 'Username';}" -->
+			<input type="password" value="123">
+			<div class="ps">
+				<img src="images/login/pass.png" title="必填"/>
+			</div>
+			<div class="login" title="登录">
+				<input type="submit" value="Login">
+			</div>
+		</form>
+	</div>
+	<div class="copy-rights">
+		<p>
+			<a>Copyright &copy; 2018 V1.1.Company BPG all rights reserved.</a>
+		</p>
+	</div>
+</body>
+</html>

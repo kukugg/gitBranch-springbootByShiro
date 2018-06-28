@@ -1,0 +1,84 @@
+package com.bpglr.index.controller;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.bpglr.index.model.SysRole;
+import com.bpglr.index.service.SysRoleService;
+import com.bpglr.utils.R;
+
+/**
+ * @Title:SysRoleController
+ * @Description:	
+ * @Author hjp	
+ * @Date 2018年6月15日
+ */
+@RestController
+@RequestMapping("/sys/role")
+public class SysRoleController {
+	
+	
+	private static final Logger log = LoggerFactory.getLogger(SysRoleController.class);
+
+	@Autowired
+	private SysRoleService sysRoleService;
+	
+	/**
+	 * @Title: getAllSysRole   
+	 * @Description: 获得所有角色  
+	 * @param @return   
+	 * @return R    
+	 * @throws   
+	 * @Author hjp
+	 * @Date 2018年6月15日
+	 */
+	@RequestMapping("/select")
+	public R getAllSysRole() {
+		
+		List<SysRole> sysRoleList = new ArrayList<SysRole>();
+		try {
+			sysRoleList = sysRoleService.getAllSysRole();
+		} catch (Exception e) {
+			log.error("获得所有角色  ：" + e);
+		}
+				
+		return R.ok().put("list", sysRoleList);
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+}

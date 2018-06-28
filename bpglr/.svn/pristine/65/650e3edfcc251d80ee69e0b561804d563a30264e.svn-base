@@ -1,0 +1,38 @@
+package com.bpglr.index.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.bpglr.index.service.UserInfoService;
+import com.bpglr.utils.R;
+
+/**
+ * @Title:SysUserController
+ * @Description: 用户信息列表	
+ * @Author hjp	
+ * @Date 2018年6月12日
+ */
+@RestController
+@RequestMapping("/sys/user")
+public class SysUserController extends AbstractController {
+	
+	@Autowired
+	private UserInfoService userInfoService;
+	
+	/**
+	 * @Title: info   
+	 * @Description: 获取用户的登陆信息  
+	 * @param @return   
+	 * @return R    
+	 * @throws   
+	 * @Author hjp
+	 * @Date 2018年6月12日
+	 */
+	@RequestMapping("/info")
+	public R info() {
+		return R.ok().put("user", getUserSession());
+	}
+	
+
+}

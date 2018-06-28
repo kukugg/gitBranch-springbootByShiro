@@ -1,0 +1,95 @@
+package com.bpglr.index.controller;
+
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.bpglr.index.model.SysMenu;
+import com.bpglr.index.service.SysMenuService;
+import com.bpglr.utils.ResultData;
+
+/**
+ * @Title:SysMenuController
+ * @Description:登陆菜单展示	
+ * @Author hjp	
+ * @Date 2018年6月7日
+ */
+@RestController
+@RequestMapping("/sys/menu")
+public class SysMenuController extends AbstractController {
+	
+	@Autowired
+	private SysMenuService sysMenuService;
+	
+	/**
+	 * 
+	 * @Title: nav   
+	 * @Description: 导航菜单  
+	 * @param @return   
+	 * @return R    
+	 * @throws   
+	 * @Author hjp
+	 * @Date 2018年6月7日
+	 */
+	@RequestMapping("/nav")
+	public ResultData nav() {
+		
+		List<SysMenu> menuList = sysMenuService.findUserMenuList(getUserId());
+		return ResultData.ok().put("menuList", menuList);
+		
+	}
+	
+	/**
+	 * @Title: list   
+	 * @Description: 所有菜单列表  
+	 * @param @return   
+	 * @return List<SysMenu>    
+	 * @throws   
+	 * @Author hjp
+	 * @Date 2018年6月25日
+	 */
+	@RequestMapping("/list")
+	public List<SysMenu> list() {
+		
+		List<SysMenu> menuList = sysMenuService.findAllMenu();
+		return menuList;
+	}
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+}

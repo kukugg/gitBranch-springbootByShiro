@@ -1,0 +1,209 @@
+package com.bpglr.index.controller;
+
+
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.bpglr.index.model.SysDept;
+import com.bpglr.index.service.SysDeptService;
+import com.bpglr.utils.R;
+
+/**
+ * @Title:SysDeptController
+ * @Description:部门管理	
+ * @Author hjp	
+ * @Date 2018年6月12日
+ */
+@RestController
+@RequestMapping("/sys/dept")
+public class SysDeptController extends AbstractController{
+	
+	
+	private static final Logger log = LoggerFactory.getLogger(SysDeptController.class);
+
+	@Autowired
+	private SysDeptService sysDeptService;
+	
+	/**
+	 * @Title: getAllDeptList   
+	 * @Description: 部门列表  
+	 * @param @return   
+	 * @return List<SysDept>    
+	 * @throws   
+	 * @Author hjp
+	 * @Date 2018年6月13日
+	 */
+	@RequestMapping("/list")
+	public List<SysDept> getAllDeptList() {
+		List<SysDept> deptList = null;
+		Map<String, Object> params = new HashMap<String, Object>();
+		try {
+			deptList = sysDeptService.getAllDeptList(params);
+		} catch (Exception e) {
+			log.error("部门列表查询出错： "+ e);
+		}
+		
+		return deptList;
+	}
+	
+	/**
+	 * @Title: getParentId   
+	 * @Description: 获取根部门id  
+	 * @param @return   
+	 * @return R    
+	 * @throws   
+	 * @Author hjp
+	 * @Date 2018年6月13日
+	 */
+	@RequestMapping("/info")
+	public R getParentId() {
+		long deptId = 0; //默认最高层部门父id 为 0 
+	/*	List<SysDept> deptList = sysDeptService.getAllDeptList();
+		Long parantId = null;
+		for (SysDept sysDept : deptList) {
+			if (parantId == null) {
+				parantId = sysDept.getParentId();
+				continue;
+			}
+			if ()
+		}*/
+		
+		return R.ok().put("deptId", deptId);
+	}
+	
+	/**
+	 * @Title: selectDepteTree   
+	 * @Description:  加载部门树，只加载自己层级下的 添加，修改部门 
+	 * @param @return   
+	 * @return R    
+	 * @throws   
+	 * @Author hjp
+	 * @Date 2018年6月13日
+	 */
+	@RequestMapping("/select")
+	public R selectDepteTree() {
+		List<SysDept> deptList = null;
+		Long deptId = getUser().getDeptId();
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("deptId", deptId);
+		try {
+			deptList = sysDeptService.selectDepteTree(params);
+		} catch (Exception e) {
+			log.error("加载部门树出错： "+ e);
+		}
+		
+		return R.ok().put("deptList", deptList);
+		
+	}
+	
+	/**
+	 * @Title: save   
+	 * @Description: 保存  
+	 * @param @return   
+	 * @return R    
+	 * @throws   
+	 * @Author hjp
+	 * @Date 2018年6月13日
+	 */
+	@RequestMapping("/save")
+	public R save(@RequestBody SysDept sysDept) {
+		try {
+			sysDept.setDelFlag("0");
+			sysDeptService.save(sysDept);
+		} catch (Exception e) {
+			log.error("保存 部门出错： "+ e);
+			return R.error();
+		}
+		
+		return R.ok();
+		
+	}
+	
+	/**
+	 * @Title: findDeptByDeptId   
+	 * @Description:   根据部门id查询部门信息
+	 * @param @param deptId
+	 * @param @return   
+	 * @return R    
+	 * @throws   
+	 * @Author hjp
+	 * @Date 2018年6月13日
+	 */
+	@RequestMapping("/info/{deptId}")
+	public R findDeptByDeptId(@PathVariable("deptId") Long deptId) {
+		SysDept sysDept = new SysDept();
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("deptId", deptId);
+		try {
+			List<SysDept> depts = sysDeptService.findDeptByDeptId(params);
+			if (depts != null && depts.size() > 0) {
+				sysDept = depts.get(0);
+			}	
+		} catch (Exception e) {
+			log.error("查询部门id出错： "+ e);
+		}
+		
+		return R.ok().put("dept", sysDept);
+	}
+	
+	/**
+	 * @Title: update   
+	 * @Description:修改  
+	 * @param @return   
+	 * @return R    
+	 * @throws   
+	 * @Author hjp
+	 * @Date 2018年6月13日
+	 */
+	@RequestMapping("/update")
+	public R update(@RequestBody SysDept sysDept) {
+		try {
+			sysDeptService.update(sysDept);
+		} catch (Exception e) {
+			log.error("修改 部门出错： "+ e);
+			return R.error();
+		}
+		
+		return R.ok();
+		
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+}

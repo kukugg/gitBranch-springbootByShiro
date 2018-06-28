@@ -1,0 +1,26 @@
+
+document.write('<script type="text/javascript" src="/libs/jquery.min.js"></script>');
+
+document.write('/plugins/layer/layer.js"></script>');
+
+document.write('/libs/bootstrap.min.js"></script>');
+
+document.write('/libs/vue.min.js"></script>');
+
+document.write('/plugins/jqgrid/grid.locale-cn.js"></script>');
+
+document.write('/plugins/jqgrid/jquery.jqGrid.min.js"></script>');
+
+document.write('/plugins/ztree/jquery.ztree.all.min.js"></script>');
+
+document.write('/js/common.js"></script>');
+
+document.write('<link href="/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>');
+
+document.write('<link href="/css/font-awesome.min.css" rel="stylesheet" type="text/css"/>');
+
+document.write('<link href="/plugins/jqgrid/ui.jqgrid-bootstrap.css" rel="stylesheet" type="text/css"/>');
+
+document.write('<link href="/plugins/ztree/css/metroStyle/metroStyle.css" rel="stylesheet" type="text/css"/>');
+
+document.write('<link href="/css/main.css" rel="stylesheet" type="text/css"/>');

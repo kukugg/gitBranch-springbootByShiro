@@ -1,0 +1,22 @@
+package com.bpglr.index.dao;
+
+import org.apache.ibatis.annotations.Param;
+
+import com.bpglr.index.model.UserInfo;
+
+public interface UserInfoDao {
+    int deleteByPrimaryKey(Long userId);
+
+    int insert(UserInfo record);
+
+    int insertSelective(UserInfo record);
+
+    UserInfo selectByPrimaryKey(Long userId);
+
+    int updateByPrimaryKeySelective(UserInfo record);
+
+    int updateByPrimaryKey(UserInfo record);
+    
+    //用户名查询用户信息
+    UserInfo findByUserName(@Param("username")  String username);
+}

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bpglr.test.dao.MytestDao">
+  <resultMap id="Mytest" type="com.bpglr.test.model.Mytest">
+    <id column="user_id" jdbcType="INTEGER" property="userId" />
+    <result column="user_name" jdbcType="VARCHAR" property="userName" />
+    <result column="password" jdbcType="VARCHAR" property="password" />
+    <result column="phone" jdbcType="VARCHAR" property="phone" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    user_id, user_name, password, phone
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="Mytest">
+    select 
+    <include refid="Base_Column_List" />
+    from mytest
+    where user_id = #{userId,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from mytest
+    where user_id = #{userId,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.bpglr.test.model.Mytest">
+    insert into mytest (user_id, user_name, password, 
+      phone)
+    values (#{userId,jdbcType=INTEGER}, #{userName,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, 
+      #{phone,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.bpglr.test.model.Mytest">
+    insert into mytest
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="userId != null">
+        user_id,
+      </if>
+      <if test="userName != null">
+        user_name,
+      </if>
+      <if test="password != null">
+        password,
+      </if>
+      <if test="phone != null">
+        phone,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="userId != null">
+        #{userId,jdbcType=INTEGER},
+      </if>
+      <if test="userName != null">
+        #{userName,jdbcType=VARCHAR},
+      </if>
+      <if test="password != null">
+        #{password,jdbcType=VARCHAR},
+      </if>
+      <if test="phone != null">
+        #{phone,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.bpglr.test.model.Mytest">
+    update mytest
+    <set>
+      <if test="userName != null">
+        user_name = #{userName,jdbcType=VARCHAR},
+      </if>
+      <if test="password != null">
+        password = #{password,jdbcType=VARCHAR},
+      </if>
+      <if test="phone != null">
+        phone = #{phone,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where user_id = #{userId,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.bpglr.test.model.Mytest">
+    update mytest
+    set user_name = #{userName,jdbcType=VARCHAR},
+      password = #{password,jdbcType=VARCHAR},
+      phone = #{phone,jdbcType=VARCHAR}
+    where user_id = #{userId,jdbcType=INTEGER}
+  </update>
+  
+  <!-- 查询全部 -->
+  <select id="findAllList" resultMap="Mytest">
+		SELECT
+		<include refid="Base_Column_List" />
+		from mytest
+		where 1 =1 
+		<if test="userName != null and userName !='' ">
+				AND user_name like CONCAT('%',#{username},'%')
+		</if>
+		<if test="phone != null and phone !='' ">
+				AND phone = #{phone}
+		</if>
+	</select> 
+	
+</mapper>

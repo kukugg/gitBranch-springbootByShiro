@@ -1,0 +1,311 @@
+package com.bpglr.index.service;
+
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.bpglr.index.dao.SysMenuDao;
+import com.bpglr.index.dao.SysRoleDao;
+import com.bpglr.index.dao.SysUserRoleDao;
+import com.bpglr.index.dao.UserInfoDao;
+import com.bpglr.index.model.SysMenu;
+import com.bpglr.index.model.SysRole;
+import com.bpglr.index.model.SysUserRole;
+import com.bpglr.index.model.UserInfo;
+import com.bpglr.utils.ShiroUtils;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+
+/**
+ * @Title:UserInfoService
+ * @Description:查询用户信息	
+ * @Author hjp	
+ * @Date 2018年6月4日
+ */
+@Service
+public class UserInfoService {
+	@Autowired
+	private UserInfoDao userInfoDao;
+	
+	@Autowired
+	private SysRoleDao sysRoleDao;
+	
+	@Autowired
+	private SysMenuDao sysMenuDao;
+	
+	@Autowired
+	private SysUserRoleDao sysUserRoleDao;
+	
+	/**
+	 * 
+	 * @Title: findByUserName   
+	 * @Description:   获得用户
+	 * @param @param userName
+	 * @param @return   
+	 * @return UserInfo    
+	 * @throws   
+	 * @Author hjp
+	 * @Date 2018年6月4日
+	 */
+	public UserInfo findByUserName(String userName) {
+		UserInfo userInfo = userInfoDao.findByUserName(userName);
+		return userInfo;
+	}
+	
+	/**
+	 * 
+	 * @Title: findSysRoleByUserInfo   
+	 * @Description:   根据用户获得角色
+	 * @param @param userInfo
+	 * @param @return   
+	 * @return List<SysRole>    
+	 * @throws   
+	 * @Author hjp
+	 * @Date 2018年6月4日
+	 */
+	public List<SysRole> findSysRoleByUserInfo(UserInfo userInfo) {
+		List<SysRole> sysRoles = sysRoleDao.findSysRoleByUserInfo(userInfo);
+		return sysRoles;
+	}
+	
+	/**
+	 * @Title: findSysMenuByRole   
+	 * @Description: 获得权限菜单  
+	 * @param @param sysRoles
+	 * @param @return   
+	 * @return List<SysMenu>    
+	 * @throws   
+	 * @Author hjp
+	 * @Date 2018年6月7日
+	 */
+	public List<SysMenu> findSysMenuByRole(List<SysRole> sysRoles) {
+		List<SysMenu> sysMenus = new ArrayList<SysMenu>();
+		if (sysRoles != null) {
+			List<Long> ids = new ArrayList<Long>();
+			for (SysRole sysRole : sysRoles) {
+				ids.add(sysRole.getRoleId());
+			}
+			if (ids.size() > 0 ) {
+				Map<String, Object> params = new HashMap<String, Object>();
+				params.put("ids", ids);
+				sysMenus = sysMenuDao.findSysMenuByRole(params);
+				
+			}
+			
+		}
+		
+		return sysMenus;
+	}
+	
+	/**
+	 * @Title: getAllUserList   
+	 * @Description:   查询所有用户 
+	 * @param @param params
+	 * @param @return   
+	 * @return PageInfo<UserInfo>    
+	 * @throws   
+	 * @Author hjp
+	 * @Date 2018年6月12日
+	 */
+	public PageInfo<UserInfo> getAllUserList(Map<String, Object> params) throws Exception{
+		int pageNum = 1;
+		int pageSize = 10;
+		if (params.get("page") != null && params.get("page") != "") {
+			pageNum = Integer.parseInt(params.get("page")+"");
+		}
+		if (params.get("limit") != null && params.get("limit") != "") {
+			pageSize = Integer.parseInt(params.get("limit")+"");
+		}
+		PageHelper.startPage(pageNum, pageSize);
+		List<UserInfo> resultList = new ArrayList<UserInfo>();
+		String username = "";
+		if (params.get("username") != null) {
+			username = params.get("username")+"";
+		}
+		resultList =  userInfoDao.getAllUserList(username);
+		PageInfo<UserInfo> result = new PageInfo<UserInfo>(resultList);
+		return result;
+		
+	}
+	
+	/**
+	 * @Title: sava   
+	 * @Description: 保存用户信息
+	 * @param @param userInfo   
+	 * @return void    
+	 * @throws   
+	 * @Author hjp
+	 * @Date 2018年6月20日
+	 */
+	@Transactional(rollbackFor = Exception.class)
+	public void sava(UserInfo userInfo) {
+		if (userInfo.getPassword() != null && !"".equals(userInfo.getPassword())) {
+			//sha256加密
+			String salt = RandomStringUtils.randomAlphanumeric(20);
+			userInfo.setSalt(salt);
+			userInfo.setPassword(ShiroUtils.sha256(userInfo.getPassword(), userInfo.getSalt()));
+		}
+		userInfoDao.insertSelective(userInfo);
+		
+		//保存角色关系
+		if (userInfo.getRoleIdList() != null && userInfo.getRoleIdList().size() > 0) {
+			
+			saveOrUpdateUserRole(userInfo.getUserId(),userInfo.getRoleIdList());
+			
+		}
+		
+		
+	}
+	
+	/**
+	 * @Title: saveOrUpdateUserRole   
+	 * @Description:  保存用户和角色关系 
+	 * @param @param userId
+	 * @param @param sysUserRoles   
+	 * @return void    
+	 * @throws   
+	 * @Author hjp
+	 * @Date 2018年6月22日
+	 */
+	public void saveOrUpdateUserRole(Long userId,List<Long> ids) {
+		
+		if (userId != null) {
+			//删除角色关系
+			sysUserRoleDao.deleteRoleyUserId(userId);
+			List<SysUserRole> sysUserRoles = new ArrayList<SysUserRole>();
+			for(Long id : ids) {
+				SysUserRole sysUserRole = new SysUserRole();
+				sysUserRole.setRoleId(id);
+				sysUserRole.setUserId(userId);
+				sysUserRoles.add(sysUserRole);
+			}
+			
+			sysUserRoleDao.insertByBatch(sysUserRoles);
+			
+			
+		}
+	}
+	
+	/**
+	 * @Title: selectByPrimaryKey   
+	 * @Description:  根据userid寻找用户 
+	 * @param @param userId
+	 * @param @return   
+	 * @return UserInfo    
+	 * @throws   
+	 * @Author hjp
+	 * @Date 2018年6月22日
+	 */
+	public UserInfo selectByPrimaryKey(Long userId) {
+		
+		return userInfoDao.selectByPrimaryKey(userId);
+	}
+
+	/**
+	 * @Title: update   
+	 * @Description: 更新  
+	 * @param @param userInfo   
+	 * @return void    
+	 * @throws   
+	 * @Author hjp
+	 * @Date 2018年6月22日
+	 */
+	@Transactional(rollbackFor = Exception.class)
+	public void update(UserInfo userInfo) {
+		if (StringUtils.isNotBlank(userInfo.getPassword())) {
+			userInfo.setPassword(ShiroUtils.sha256(userInfo.getPassword(), userInfo.getSalt()));
+		}
+		
+		userInfoDao.updateByPrimaryKeySelective(userInfo);
+		
+		//保存用户与角色关系
+		if (userInfo.getRoleIdList() != null && userInfo.getRoleIdList().size() > 0) {
+			saveOrUpdateUserRole(userInfo.getUserId(),userInfo.getRoleIdList());
+		}
+		
+		
+	}
+	
+	
+	
+	/**
+	 * @Title: delete   
+	 * @Description: 用户删除，状态为0  
+	 * @param @param ids   
+	 * @return void    
+	 * @throws   
+	 * @Author hjp
+	 * @Date 2018年6月23日
+	 */
+	@Transactional(rollbackFor = Exception.class)
+	public void delete(List<Long> ids) {
+		userInfoDao.deleteByBatch(ids);
+	}
+	
+	/**
+	 * @Title: updatePassword   
+	 * @Description: 更新密码  
+	 * @param @param userId
+	 * @param @param newPassword   
+	 * @return void    
+	 * @throws   
+	 * @Author hjp
+	 * @Date 2018年6月25日
+	 */
+	@Transactional(rollbackFor = Exception.class)
+	public void updatePassword(Long userId,String newPassword) {
+		UserInfo userInfo = new UserInfo();
+		userInfo.setUserId(userId);
+		userInfo.setPassword(newPassword);
+		userInfoDao.updateByPrimaryKeySelective(userInfo);
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+}

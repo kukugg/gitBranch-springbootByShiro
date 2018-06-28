@@ -1,0 +1,23 @@
+package com.bpglr.index.dao;
+
+import java.util.List;
+
+import com.bpglr.index.model.SysRole;
+import com.bpglr.index.model.UserInfo;
+
+public interface SysRoleDao {
+    int deleteByPrimaryKey(Long roleId);
+
+    int insert(SysRole record);
+
+    int insertSelective(SysRole record);
+
+    SysRole selectByPrimaryKey(Long roleId);
+
+    int updateByPrimaryKeySelective(SysRole record);
+
+    int updateByPrimaryKey(SysRole record);
+    
+    //根据用户获得角色集合
+    List<SysRole> findSysRoleByUserInfo(UserInfo userInfo);
+}

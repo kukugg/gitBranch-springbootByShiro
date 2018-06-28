@@ -1,0 +1,141 @@
+package com.bpglr.index.controller;
+
+
+
+import java.util.Date;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.bpglr.index.model.UserInfo;
+import com.bpglr.index.service.UserInfoService;
+import com.bpglr.utils.ResultData;
+import com.github.pagehelper.PageInfo;
+
+/**
+ * @Title:SysUserController
+ * @Description: 用户信息列表	
+ * @Author hjp	
+ * @Date 2018年6月12日
+ */
+@RestController
+@RequestMapping("/sys/user")
+public class SysUserController extends AbstractController {
+	
+	
+	private static final Logger log = LoggerFactory.getLogger(SysUserController.class);
+
+	
+	@Autowired
+	private UserInfoService userInfoService;
+	
+	/**
+	 * @Title: info   
+	 * @Description: 获取用户的登陆信息  
+	 * @param @return   
+	 * @return R    
+	 * @throws   
+	 * @Author hjp
+	 * @Date 2018年6月12日
+	 */
+	@RequestMapping("/info")
+	public ResultData info() {
+		return ResultData.ok().put("user", getUserSession());
+	}
+	
+	/**
+	 * @Title: getAllUserList   
+	 * @Description:员工列表   
+	 * @param @param params
+	 * @param @return   
+	 * @return R    
+	 * @throws   
+	 * @Author hjp
+	 * @Date 2018年6月12日
+	 */
+	@RequestMapping("/list")
+	public ResultData getAllUserList(@RequestParam Map<String, Object> params) {
+		PageInfo<UserInfo> pageInfo = new PageInfo<UserInfo>();
+		try {
+			pageInfo = userInfoService.getAllUserList(params);
+		} catch (Exception e) {
+			log.error("查询员工列表出错："+e);
+		}
+		
+		return ResultData.ok().put("page", pageInfo);
+	
+		
+	}
+	
+	
+	/**
+	 * @Title: save   
+	 * @Description: 保存员工列表  
+	 * @param @param userInfo
+	 * @param @return   
+	 * @return R    
+	 * @throws   
+	 * @Author hjp
+	 * @Date 2018年6月19日
+	 */
+	@RequestMapping("/save")
+	public ResultData save(@RequestBody UserInfo userInfo) {
+		if (userInfo.getStatus() == null) {
+			userInfo.setStatus("1");
+		}
+		userInfo.setCreateTime(new Date());
+		
+		try {
+			userInfoService.sava(userInfo);
+		} catch (Exception e) {
+			log.error("保存员工列表出错："+e);
+			return ResultData.error("保存员工列表出错："+e);
+		}
+		
+		
+		
+		return ResultData.ok();
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+}

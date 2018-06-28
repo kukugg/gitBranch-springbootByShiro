@@ -1,0 +1,216 @@
+package com.bpglr.index.service;
+
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.bpglr.index.dao.SysRoleDao;
+import com.bpglr.index.dao.SysRoleMenuDao;
+import com.bpglr.index.model.SysRole;
+import com.bpglr.index.model.SysRoleMenu;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+
+/**
+ * @Title:SysRoleService
+ * @Description: 角色管理
+ * @Author hjp	
+ * @Date 2018年6月15日
+ */
+@Service
+public class SysRoleService {
+	
+	@Autowired
+	private SysRoleDao sysRoleDao;
+	
+	@Autowired
+	private SysRoleMenuDao sysRoleMenuDao;
+	
+	/**
+	 * @Title: getAllSysRole   
+	 * @Description: 获得所有角色  
+	 * @param @return   
+	 * @return List<SysRole>    
+	 * @throws   
+	 * @Author hjp
+	 * @Date 2018年6月27日
+	 */
+	public List<SysRole> getAllSysRole() {
+		return sysRoleDao.getAllSysRole(null);
+	}
+	
+	/**
+	 * @Title: getAllRolePage   
+	 * @Description:  分页查询角色列表 
+	 * @param @param params
+	 * @param @return   
+	 * @return PageInfo<SysRole>    
+	 * @throws   
+	 * @Author hjp
+	 * @Date 2018年6月27日
+	 */
+	public PageInfo<SysRole> getAllRolePage(Map<String, Object> params) {
+		int pageNum = 1;
+		int pageSize = 10;
+		if (params.get("page") != null && params.get("page") != "") {
+			pageNum = Integer.parseInt(params.get("page")+"");
+		}
+		if (params.get("limit") != null && params.get("limit") != "") {
+			pageSize = Integer.parseInt(params.get("limit")+"");
+		}
+		PageHelper.startPage(pageNum, pageSize);
+		List<SysRole> allSysRole = sysRoleDao.getAllSysRole(params);
+		PageInfo<SysRole> pageInfo = new PageInfo<SysRole>(allSysRole);
+		return pageInfo;
+		
+	}
+	
+	/**
+	 * @Title: save   
+	 * @Description:  保存角色
+	 * @param @param sysRole   
+	 * @return void    
+	 * @throws   
+	 * @Author hjp
+	 * @Date 2018年6月27日
+	 */
+	@Transactional(rollbackFor = Exception.class)
+	public void save(SysRole sysRole) {
+		sysRole.setCreateTime(new Date());
+		sysRoleDao.insertSelective(sysRole);
+		if (sysRole.getMenuIdList() != null && sysRole.getMenuIdList().size() > 0) {
+			saveOrUpdate(sysRole.getRoleId(), sysRole.getMenuIdList());
+		}
+	}
+	
+	
+	/**
+	 * @Title: saveOrUpdate   
+	 * @Description: 批量保存或者修改角色菜单关系  
+	 * @param @param roleId
+	 * @param @param menuIdList   
+	 * @return void    
+	 * @throws   
+	 * @Author hjp
+	 * @Date 2018年6月27日
+	 */
+	public void saveOrUpdate(Long roleId, List<Long> menuIdList) {
+		//删除角色菜单关系
+		if (roleId != null) {
+			sysRoleMenuDao.deleteByRoleId(roleId);
+		} 
+		
+		if (menuIdList.size() == 0) {
+			return ;
+		}
+		
+		//保存角色与菜单关系
+		List<SysRoleMenu> sysRoleMenus = new ArrayList<SysRoleMenu>();
+		
+		for (Long menuId : menuIdList) {
+			SysRoleMenu sysRoleMenu = new SysRoleMenu();
+			sysRoleMenu.setMenuId(menuId);
+			sysRoleMenu.setRoleId(roleId);
+			sysRoleMenus.add(sysRoleMenu);
+		}
+		
+		sysRoleMenuDao.insertByBatch(sysRoleMenus);
+	}
+	
+	/**
+	 * @Title: getSysRoleById   
+	 * @Description:   根据id寻找角色
+	 * @param @param roleId
+	 * @param @return   
+	 * @return SysRole    
+	 * @throws   
+	 * @Author hjp
+	 * @Date 2018年6月27日
+	 */
+	public SysRole getSysRoleById(Long roleId) {
+		
+		return sysRoleDao.selectByPrimaryKey(roleId);
+		
+	}
+	
+	/**
+	 * @Title: getSysMenuIdsByRoleId   
+	 * @Description: 根据角色id寻找菜单id  
+	 * @param @param roleId
+	 * @param @return   
+	 * @return List<Long>    
+	 * @throws   
+	 * @Author hjp
+	 * @Date 2018年6月27日
+	 */
+	public List<Long> getSysMenuIdsByRoleId(Long roleId) {
+		
+		return sysRoleMenuDao.getSysMenuIdsByRoleId(roleId);
+	}
+	
+	/**
+	 * @Title: update   
+	 * @Description:  修改 
+	 * @param @param sysRole   
+	 * @return void    
+	 * @throws   
+	 * @Author hjp
+	 * @Date 2018年6月27日
+	 */
+	@Transactional(rollbackFor = Exception.class)
+	public void update(SysRole sysRole) {
+		sysRoleDao.updateByPrimaryKeySelective(sysRole);
+		if (sysRole.getMenuIdList() != null) {
+			saveOrUpdate(sysRole.getRoleId(), sysRole.getMenuIdList());
+		}
+	}
+	
+	/**
+	 * @Title: deleteBatch   
+	 * @Description:  删除 
+	 * @param @param roleIds   
+	 * @return void    
+	 * @throws   
+	 * @Author hjp
+	 * @Date 2018年6月28日
+	 */
+	@Transactional(rollbackFor = Exception.class)
+	public void deleteBatch(Long[] roleIds) {
+		//删除角色
+		sysRoleDao.deleteBatchIds(roleIds);
+		
+		//删除角色用户关系
+		sysRoleDao.deleteBatchRoleAndUser(roleIds);
+		
+		//删除角色菜单关系
+		
+		sysRoleDao.deleteBatchRoleAndMenu(roleIds);
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+}

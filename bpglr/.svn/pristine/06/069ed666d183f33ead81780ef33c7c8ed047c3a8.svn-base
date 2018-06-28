@@ -1,0 +1,6 @@
+var a = new Vue({
+	el:'#app',
+	data: {
+		message: 'hello vue'
+	}
+});
